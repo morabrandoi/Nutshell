@@ -47,9 +47,10 @@ extern int yydebug;
 /* "%code requires" blocks.  */
 #line 18 "parser.y"
 
+    #include <string>
     #include "global.h"
 
-#line 53 "parser.tab.h"
+#line 54 "parser.tab.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -103,7 +104,7 @@ union YYSTYPE
   std::string* BACKSLASH;                  /* BACKSLASH  */
   std::string* AMPER;                      /* AMPER  */
 
-#line 107 "parser.tab.h"
+#line 108 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

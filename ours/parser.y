@@ -7,7 +7,7 @@ int yylex(); // Defined in lex.yy.c
 
 int yyparse(); // Need this definition so that yyerror can call it
 
-void yyerror(char* e) {
+void yyerror(const char* e) {
 	printf("Errork: %s\n", e);
 
     yyparse();
@@ -16,9 +16,10 @@ void yyerror(char* e) {
 %}
 
 %code requires {
+    #include <string>
     #include "global.h"
 }
-
+%define parse.error verbose
 %define api.value.type union
 
 %token <std::string*> BYE CD ALIAS SETENV PRINTENV UNSETENV END
@@ -28,11 +29,11 @@ void yyerror(char* e) {
 %%
 
 cmd_line:
-    CD END          { cd(); return 1; }
-    | BYE END       { bye(); return 1; }
+    BYE END       { bye(); return 1; }
+    | CD WORD END     { cd($1); return 1; };
     | ALIAS END     { alias(); return 1; }
     | SETENV END    { setenv(); return 1; }
     | PRINTENV END  { printenv(); return 1; }
     | UNSETENV END  { unsetenv(); return 1; }
-    | END           { return 1;}
+    | END           { return 1;};
 
