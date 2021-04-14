@@ -19,6 +19,8 @@ bool ifAlias(char* name){
     }
     return false;
 }
+int aliasFlag = 1;
+
 %}
 %array
 %option noyywrap
@@ -33,25 +35,29 @@ ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_
 <string_condition>[\"]          {BEGIN(INITIAL);}
 
 [ ]		            { }
-bye                 { return BYE; }
-cd		            { return CD;}
-alias		        { return ALIAS; }
-SETENV              { return SETENV; }
-UNSETENV            { return UNSETENV; }
-UNALIAS             { return UNALIAS; }
-"\n"		        { return END; }
-[\"]                 { BEGIN(string_condition); }
-{CHAR}+              {if(ifAlias(yytext)) {
-                        printf("yytext: %s\n", yytext);
-                        //source: https://www.cs.princeton.edu/~appel/modern/c/software/flex/flex.html
-                           char *yycopy = strdup( subAliases(yytext) );
-                           for ( int i = strlen(subAliases(yytext)) - 1; i >= 0; --i )
-                               unput( yycopy[i] );
-                           free( yycopy );
-                    } else {
-                        printf("yytext: %s\n", yytext);
-                        yylval.string = strdup(yytext);
-                        return STRING;
-                    };
-                     }
+bye                 { aliasFlag = 0; return BYE; }
+cd		            { aliasFlag = 0; return CD;}
+alias		        { aliasFlag = 0; return ALIAS; }
+setenv              { aliasFlag = 0; return SETENV; }
+unsetenv            { aliasFlag = 0; return UNSETENV; }
+unalias             { aliasFlag = 0; return UNALIAS; }
+"\n"		        { aliasFlag = 1; return END; }
+[\"]                { BEGIN(string_condition); }
+{CHAR}+             { 
+                        
+                        if ( aliasFlag == 1 && ifAlias(yytext) ) {
+                            
+                            printf("yytext: %s\n", yytext);
+                            //source: https://www.cs.princeton.edu/~appel/modern/c/software/flex/flex.html
+                            char *yycopy = strdup( subAliases(yytext) );
+                            for ( int i = strlen(subAliases(yytext)) - 1; i >= 0; --i )
+                                unput( yycopy[i] );
+                            free( yycopy );
+                        } else {
+                            printf("yytext: %s\n", yytext);
+                            yylval.string = strdup(yytext);
+                            aliasFlag = 0;
+                            return STRING;
+                        };
+                    }
 %%
