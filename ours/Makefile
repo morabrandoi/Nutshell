@@ -1,15 +1,14 @@
-all:
-	flex lexer.l
+CC=/usr/bin/cc
+
+all: 
 	bison -d parser.y
-	# Since we have noyywrap enabled, we don't need to compile with -lfl
-	g++ -o nutshell nutshell.cpp lex.yy.c parser.tab.c
+	flex lexer.l
+	$(CC) nutshell.c parser.tab.c lex.yy.c -o nutshell
 
-
-debug:
-	flex -d lexer.l
+debug: 
 	bison -t -d parser.y
-	# Since we have noyywrap enabled, we don't need to compile with -lfl
-	g++ -o nutshell nutshell.cpp lex.yy.c parser.tab.c
+	flex -d lexer.l
+	$(CC) nutshell.c parser.tab.c lex.yy.c -o nutshell
 
 clean:
 	rm parser.tab.c parser.tab.h lex.yy.c nutshell
