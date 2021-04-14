@@ -21,13 +21,13 @@ int main()
     strcpy(varTable.word[varIndex], cwd);
     varIndex++;
     strcpy(varTable.var[varIndex], "HOME");
-    strcpy(varTable.word[varIndex], cwd);
+    strcpy(varTable.word[varIndex], getenv("HOME"));
     varIndex++;
     strcpy(varTable.var[varIndex], "PROMPT");
     strcpy(varTable.word[varIndex], "nutshell");
     varIndex++;
     strcpy(varTable.var[varIndex], "PATH");
-    strcpy(varTable.word[varIndex], ".:/bin");
+    strcpy(varTable.word[varIndex], getenv("PATH"));
     varIndex++;
 
     system("clear");

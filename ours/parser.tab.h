@@ -39,7 +39,7 @@
 # define YY_YY_PARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 1
+# define YYDEBUG 0
 #endif
 #if YYDEBUG
 extern int yydebug;
@@ -56,12 +56,12 @@ extern int yydebug;
     YYUNDEF = 257,                 /* "invalid token"  */
     BYE = 258,                     /* BYE  */
     CD = 259,                      /* CD  */
-    STRING = 260,                  /* STRING  */
-    ALIAS = 261,                   /* ALIAS  */
-    END = 262,                     /* END  */
-    SETENV = 263,                  /* SETENV  */
-    UNSETENV = 264,                /* UNSETENV  */
-    UNALIAS = 265                  /* UNALIAS  */
+    ALIAS = 260,                   /* ALIAS  */
+    SETENV = 261,                  /* SETENV  */
+    UNSETENV = 262,                /* UNSETENV  */
+    UNALIAS = 263,                 /* UNALIAS  */
+    STRING = 264,                  /* STRING  */
+    END = 265                      /* END  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
