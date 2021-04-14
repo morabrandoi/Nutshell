@@ -39,18 +39,11 @@
 # define YY_YY_PARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 0
+# define YYDEBUG 1
 #endif
 #if YYDEBUG
 extern int yydebug;
 #endif
-/* "%code requires" blocks.  */
-#line 18 "parser.y"
-
-    #include <string>
-    #include "global.h"
-
-#line 54 "parser.tab.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -63,21 +56,12 @@ extern int yydebug;
     YYUNDEF = 257,                 /* "invalid token"  */
     BYE = 258,                     /* BYE  */
     CD = 259,                      /* CD  */
-    ALIAS = 260,                   /* ALIAS  */
-    SETENV = 261,                  /* SETENV  */
-    PRINTENV = 262,                /* PRINTENV  */
-    UNSETENV = 263,                /* UNSETENV  */
-    END = 264,                     /* END  */
-    WORD = 265,                    /* WORD  */
-    DOT = 266,                     /* DOT  */
-    DOTDOT = 267,                  /* DOTDOT  */
-    TILDE = 268,                   /* TILDE  */
-    LANGLE = 269,                  /* LANGLE  */
-    RANGLE = 270,                  /* RANGLE  */
-    PIPE = 271,                    /* PIPE  */
-    DUBQUOTE = 272,                /* DUBQUOTE  */
-    BACKSLASH = 273,               /* BACKSLASH  */
-    AMPER = 274                    /* AMPER  */
+    STRING = 260,                  /* STRING  */
+    ALIAS = 261,                   /* ALIAS  */
+    END = 262,                     /* END  */
+    SETENV = 263,                  /* SETENV  */
+    UNSETENV = 264,                /* UNSETENV  */
+    UNALIAS = 265                  /* UNALIAS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -86,25 +70,10 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-  std::string* BYE;                        /* BYE  */
-  std::string* CD;                         /* CD  */
-  std::string* ALIAS;                      /* ALIAS  */
-  std::string* SETENV;                     /* SETENV  */
-  std::string* PRINTENV;                   /* PRINTENV  */
-  std::string* UNSETENV;                   /* UNSETENV  */
-  std::string* END;                        /* END  */
-  std::string* WORD;                       /* WORD  */
-  std::string* DOT;                        /* DOT  */
-  std::string* DOTDOT;                     /* DOTDOT  */
-  std::string* TILDE;                      /* TILDE  */
-  std::string* LANGLE;                     /* LANGLE  */
-  std::string* RANGLE;                     /* RANGLE  */
-  std::string* PIPE;                       /* PIPE  */
-  std::string* DUBQUOTE;                   /* DUBQUOTE  */
-  std::string* BACKSLASH;                  /* BACKSLASH  */
-  std::string* AMPER;                      /* AMPER  */
+#line 18 "parser.y"
+char *string;
 
-#line 108 "parser.tab.h"
+#line 77 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
