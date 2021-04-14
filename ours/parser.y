@@ -13,13 +13,14 @@ int unAlias(char *name);
 int listAliases();
 int setEnv(char* var, char* word);
 int unsetEnv(char* name);
+int printEnv();
 
 %}
 
 %union {char *string;}
 %define parse.error verbose
 %start cmd_line
-%token <string> BYE CD ALIAS SETENV UNSETENV UNALIAS STRING END
+%token <string> BYE CD ALIAS SETENV UNSETENV PRINTENV UNALIAS STRING END
 
 %%
 cmd_line    :
@@ -29,6 +30,7 @@ cmd_line    :
 	| ALIAS END						{listAliases(); return 1;}
 	| UNALIAS STRING END			{unAlias($2); return 1;}
 	| SETENV STRING STRING END		{setEnv($2, $3); return 1;}
+	| PRINTENV END					{printEnv(); return 1;}
 	| UNSETENV STRING END			{unsetEnv($2); return 1;}
 	| END 							{return 1;}
 	;
@@ -199,6 +201,19 @@ int unsetEnv(char* var){
 		strcpy(varTable.var[lastIndex], "");
 	}
 	varIndex--;
+
+	return 1;
+}
+
+int printEnv(){
+	if (varIndex == 0) {
+		printf("No env vars saved\n");
+		return 1;
+	}
+
+	for (int i = 0; i < varIndex; i++) {
+		printf("%s=%s\n", varTable.var[i], varTable.word[i]);
+	}
 
 	return 1;
 }

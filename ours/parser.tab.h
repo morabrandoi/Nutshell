@@ -59,9 +59,10 @@ extern int yydebug;
     ALIAS = 260,                   /* ALIAS  */
     SETENV = 261,                  /* SETENV  */
     UNSETENV = 262,                /* UNSETENV  */
-    UNALIAS = 263,                 /* UNALIAS  */
-    STRING = 264,                  /* STRING  */
-    END = 265                      /* END  */
+    PRINTENV = 263,                /* PRINTENV  */
+    UNALIAS = 264,                 /* UNALIAS  */
+    STRING = 265,                  /* STRING  */
+    END = 266                      /* END  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -70,10 +71,10 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 19 "parser.y"
+#line 20 "parser.y"
 char *string;
 
-#line 77 "parser.tab.h"
+#line 78 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

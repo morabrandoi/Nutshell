@@ -41,6 +41,7 @@ alias		        { aliasFlag = 0; return ALIAS; }
 setenv              { aliasFlag = 0; return SETENV; }
 unsetenv            { aliasFlag = 0; return UNSETENV; }
 unalias             { aliasFlag = 0; return UNALIAS; }
+printenv            { aliasFlag = 0; return PRINTENV; }
 "\n"		        { aliasFlag = 1; return END; }
 [\"]                { BEGIN(string_condition); }
 {CHAR}+             { 
