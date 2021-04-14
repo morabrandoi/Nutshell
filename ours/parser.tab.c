@@ -81,7 +81,7 @@ int cd(char* arg);
 int setAlias(char *name, char *word); // implemented. Needs to check for loops of arbitrary size
 int unAlias(char *name); 
 int listAliases();
-int setEnv(char* name, char* val);
+int setEnv(char* var, char* word);
 int unsetEnv(char* name);
 
 
@@ -1710,25 +1710,19 @@ int unAlias(char *name){
 	int removeIndex = -1;
 	// find index to remove
 	for (int i = 0; i < aliasIndex; i++) {
-		printf("check1\n");
 		
 		if (strcmp(aliasTable.name[i], name) == 0){
-			printf("check2\n");
 			removeIndex = i;
-			printf("check2.1\n");
 			break;
 		}
 	}
-	printf("check2.2\n");
 	
 	// if no index was found, return no such alias exists
 	if (removeIndex == -1){
-		printf("tewstae\n");
-		printf("Error, alias wif name \"%s\" does not exist.\n", name);
+		printf("Error, alias with name \"%s\" does not exist.\n", name);
 		return 1;
 	}
 
-	printf("check3\n");
 	// delete strings at remove
 	strcpy(aliasTable.name[removeIndex], "");
 	strcpy(aliasTable.word[removeIndex], "");
@@ -1739,25 +1733,71 @@ int unAlias(char *name){
 		
 		// copy stuff at end into gap
 		strcpy(aliasTable.name[removeIndex], aliasTable.name[lastIndex]);
-		printf("check3.1\n");
 		strcpy(aliasTable.word[removeIndex], aliasTable.word[lastIndex]);	
 
 		// free old slot at end
 		strcpy(aliasTable.name[lastIndex], "");
-		printf("check3.3\n");
 		strcpy(aliasTable.word[lastIndex], "");
 	}
-	
-	printf("check3.4\n");
 	aliasIndex--;
 
 	return 1;
 }
 
-int setEnv(char* name, char* val){
+int setEnv(char* var, char* word){
+	for (int i = 0; i < varIndex; i++) {	
+		// checks if already in table
+		if((strcmp(varTable.var[i], var) == 0) && (strcmp(varTable.word[i], word) == 0)){
+			printf("Error, this variable : value pair \"%s : %s\" already in env.\n", var, word);
+			return 1;
+		}
+		// overwrites existing alias for that same name
+		else if(strcmp(varTable.var[i], var) == 0) {
+			strcpy(varTable.word[i], word);
+			return 1;
+		}
+	}
+	strcpy(varTable.var[varIndex], var);
+	strcpy(varTable.word[varIndex], word);
+	varIndex++;
+
 	return 1;
 }
 
-int unsetEnv(char* name){
+int unsetEnv(char* var){
+	int removeIndex = -1;
+	// find index to remove
+	for (int i = 0; i < varIndex; i++) {
+		
+		if (strcmp(varTable.var[i], var) == 0){
+			removeIndex = i;
+			break;
+		}
+	}
+
+	// if no index was found, return no such alias exists
+	if (removeIndex == -1){
+		printf("Error, variable with name \"%s\" does not exist.\n", var);
+		return 1;
+	}
+
+	// delete strings at remove
+	strcpy(varTable.var[removeIndex], "");
+	strcpy(varTable.word[removeIndex], "");
+
+	// check if we can fill gap we just created
+	int lastIndex = varIndex - 1;
+	if ((removeIndex != lastIndex) && lastIndex > 0){
+		
+		// copy stuff at end into gap
+		strcpy(varTable.var[removeIndex], varTable.var[lastIndex]);
+		strcpy(varTable.word[removeIndex], varTable.word[lastIndex]);	
+
+		// free old slot at end
+		strcpy(varTable.var[lastIndex], "");
+		strcpy(varTable.var[lastIndex], "");
+	}
+	varIndex--;
+
 	return 1;
 }
