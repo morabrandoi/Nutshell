@@ -45,9 +45,9 @@ printenv            { aliasFlag = 0; return PRINTENV; }
 "\n"		        { aliasFlag = 1; return END; }
 [\"]                { BEGIN(string_condition); }
 {CHAR}+             { 
-                        
+                        // aliasFlag checks onl the first token is considered for alias expansion
+                        // this whole block basically checks if its an alias word and expands on it if it is
                         if ( aliasFlag == 1 && ifAlias(yytext) ) {
-                            
                             printf("yytext: %s\n", yytext);
                             //source: https://www.cs.princeton.edu/~appel/modern/c/software/flex/flex.html
                             char *yycopy = strdup( subAliases(yytext) );
