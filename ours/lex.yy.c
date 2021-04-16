@@ -387,7 +387,7 @@ static yyconst flex_int16_t yy_accept[53] =
 static yyconst flex_int32_t yy_ec[256] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    2,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    2,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    3,    4,    5,    6,    6,    6,    6,    6,    6,
         6,    6,    1,    6,    4,    4,    4,    4,    4,    4,
@@ -510,10 +510,11 @@ bool ifAlias(char* name){
     }
     return false;
 }
-int aliasFlag = 1;
+
+int onWordInd = 0; // 0 based indexing
 
 
-#line 517 "lex.yy.c"
+#line 518 "lex.yy.c"
 
 #define INITIAL 0
 #define string_condition 1
@@ -696,10 +697,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 32 "lexer.l"
+#line 33 "lexer.l"
 
 
-#line 703 "lex.yy.c"
+#line 704 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -784,72 +785,72 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 34 "lexer.l"
+#line 35 "lexer.l"
 { yylval.string = strdup(yytext); return STRING;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 35 "lexer.l"
+#line 36 "lexer.l"
 {BEGIN(INITIAL);}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 37 "lexer.l"
+#line 38 "lexer.l"
 { }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 38 "lexer.l"
-{ aliasFlag = 0; return BYE; }
+#line 39 "lexer.l"
+{ yylval.string = strdup(yytext); return (onWordInd++ == 0) ? BYE : STRING; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 39 "lexer.l"
-{ aliasFlag = 0; return CD;}
+#line 40 "lexer.l"
+{ yylval.string = strdup(yytext); return (onWordInd++ == 0) ? CD : STRING;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 40 "lexer.l"
-{ aliasFlag = 0; return ALIAS; }
+#line 41 "lexer.l"
+{ yylval.string = strdup(yytext); return (onWordInd++ == 0) ? ALIAS : STRING; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 41 "lexer.l"
-{ aliasFlag = 0; return SETENV; }
+#line 42 "lexer.l"
+{ yylval.string = strdup(yytext); return (onWordInd++ == 0) ? SETENV : STRING; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 42 "lexer.l"
-{ aliasFlag = 0; return UNSETENV; }
+#line 43 "lexer.l"
+{ yylval.string = strdup(yytext); return (onWordInd++ == 0) ? UNSETENV : STRING; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 43 "lexer.l"
-{ aliasFlag = 0; return UNALIAS; }
+#line 44 "lexer.l"
+{ yylval.string = strdup(yytext); return (onWordInd++ == 0) ? UNALIAS : STRING; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 44 "lexer.l"
-{ aliasFlag = 0; return PRINTENV; }
+#line 45 "lexer.l"
+{ yylval.string = strdup(yytext); return (onWordInd++ == 0) ? PRINTENV : STRING; }
 	YY_BREAK
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
-#line 45 "lexer.l"
-{ aliasFlag = 1; return END; }
+#line 46 "lexer.l"
+{ onWordInd = 0; return END; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 46 "lexer.l"
+#line 47 "lexer.l"
 { BEGIN(string_condition); }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 47 "lexer.l"
+#line 48 "lexer.l"
 { 
-                        
-                        if ( aliasFlag == 1 && ifAlias(yytext) ) {
-                            
+                        // onWordInd checks onl the first token is considered for alias expansion
+                        // this whole block basically checks if its an alias word and expands on it if it is
+                        if ( onWordInd == 0 && ifAlias(yytext) ) {
                             printf("yytext: %s\n", yytext);
                             //source: https://www.cs.princeton.edu/~appel/modern/c/software/flex/flex.html
                             char *yycopy = strdup( subAliases(yytext) );
@@ -859,17 +860,17 @@ YY_RULE_SETUP
                         } else {
                             printf("yytext: %s\n", yytext);
                             yylval.string = strdup(yytext);
-                            aliasFlag = 0;
+                            onWordInd++;
                             return STRING;
                         };
                     }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 64 "lexer.l"
+#line 65 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 873 "lex.yy.c"
+#line 874 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(string_condition):
 	yyterminate();
@@ -1867,6 +1868,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 64 "lexer.l"
+#line 65 "lexer.l"
 
 
