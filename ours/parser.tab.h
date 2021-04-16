@@ -71,8 +71,8 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 20 "parser.y"
-char *string;
+#line 23 "parser.y"
+char *string; struct commandTable* command;
 
 #line 78 "parser.tab.h"
 

@@ -14,10 +14,13 @@ int listAliases();
 int setEnv(char* var, char* word);
 int unsetEnv(char* name);
 int printEnv();
+int nonBuiltIn(struct commandTable* cmd);
+struct commandTable* initCommand();
 
 %}
 
-%union {char *string;}
+%union {char *string; struct commandTable* command;}
+%type<command> nonBuiltIn
 %define parse.error verbose
 %start cmd_line
 %token <string> BYE CD ALIAS SETENV UNSETENV PRINTENV UNALIAS STRING END
@@ -32,7 +35,13 @@ cmd_line    :
 	| SETENV STRING STRING END		{setEnv($2, $3); return 1;}
 	| PRINTENV END					{printEnv(); return 1;}
 	| UNSETENV STRING END			{unsetEnv($2); return 1;}
+	| nonBuiltIn END				{nonBuiltIn($1); return 1;}
 	| END 							{return 1;}
+	;
+
+nonBuiltIn :
+	STRING							{ $$ = initCommand(); strcpy($$->commandArr[$$->index++], yylval.string); }
+	| nonBuiltIn STRING	            { strcpy($$->commandArr[$$->index++], yylval.string); }
 	;
 %%
 
@@ -78,7 +87,7 @@ int setAlias(char *name, char *word) {
 	for (int i = 0; i < aliasIndex; i++) {	
 		// checks if already in list I think
 		if((strcmp(aliasTable.name[i], name) == 0) && (strcmp(aliasTable.word[i], word) == 0)){
-			printf("Error, expansion of \"%s\" would create a loop.\n", name);
+			printf("Error, this exact alias already exists.\n");
 			return 1;
 		}
 		// overwrites existing alias for that same name
@@ -213,6 +222,33 @@ int printEnv(){
 
 	for (int i = 0; i < varIndex; i++) {
 		printf("%s=%s\n", varTable.var[i], varTable.word[i]);
+	}
+
+	return 1;
+}
+
+struct commandTable* initCommand(){
+	// struct commandTable* cur = malloc(sizeof(struct commandTable)); 
+	// char **array = malloc(WORDS * sizeof(char *));
+	// int i;
+	// for (i = 0; i < WORDS; ++i) {
+	// 	array[i] = (char *)malloc(WORD_LENGTH+1);
+	// }
+	// cur->commandArr = array;
+	// cur->index = 0;
+	// return cur;
+	struct commandTable* cur = malloc(sizeof(struct commandTable)); 
+	cur->index = 0;
+	return cur;
+	
+
+
+}
+
+int nonBuiltIn(struct commandTable* cmd){
+	int i;
+	for (i = 0; i < cmd->index; i++){
+		printf("%s ", cmd->commandArr[i]);
 	}
 
 	return 1;

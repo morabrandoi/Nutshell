@@ -84,9 +84,12 @@ int listAliases();
 int setEnv(char* var, char* word);
 int unsetEnv(char* name);
 int printEnv();
+int nonBuiltIn(struct commandTable* cmd);
+struct commandTable* initCommand();
+void freeCommand(struct commandTable* cmd);
 
 
-#line 90 "parser.tab.c"
+#line 93 "parser.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -127,7 +130,8 @@ enum yysymbol_kind_t
   YYSYMBOL_STRING = 10,                    /* STRING  */
   YYSYMBOL_END = 11,                       /* END  */
   YYSYMBOL_YYACCEPT = 12,                  /* $accept  */
-  YYSYMBOL_cmd_line = 13                   /* cmd_line  */
+  YYSYMBOL_cmd_line = 13,                  /* cmd_line  */
+  YYSYMBOL_nonBuiltIn = 14                 /* nonBuiltIn  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -447,18 +451,18 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  18
+#define YYFINAL  20
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   26
+#define YYLAST   29
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  12
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  2
+#define YYNNTS  3
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  10
+#define YYNRULES  13
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  26
+#define YYNSTATES  30
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   266
@@ -508,8 +512,8 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    27,    27,    28,    29,    30,    31,    32,    33,    34,
-      35
+       0,    31,    31,    32,    33,    34,    35,    36,    37,    38,
+      39,    40,    44,    45
 };
 #endif
 
@@ -527,7 +531,7 @@ static const char *const yytname[] =
 {
   "\"end of file\"", "error", "\"invalid token\"", "BYE", "CD", "ALIAS",
   "SETENV", "UNSETENV", "PRINTENV", "UNALIAS", "STRING", "END", "$accept",
-  "cmd_line", YY_NULLPTR
+  "cmd_line", "nonBuiltIn", YY_NULLPTR
 };
 
 static const char *
@@ -547,7 +551,7 @@ static const yytype_int16 yytoknum[] =
 };
 #endif
 
-#define YYPACT_NINF (-5)
+#define YYPACT_NINF (-4)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -561,9 +565,9 @@ static const yytype_int16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -3,    -4,     1,    -1,     2,     3,     4,     6,    -5,    14,
-      -5,     7,     9,    -5,    10,    11,    -5,    12,    -5,    -5,
-      13,    15,    -5,    -5,    -5,    -5
+      -3,     2,     4,    -1,     5,     6,     7,     9,    -4,    -4,
+      17,     1,    -4,    10,    12,    -4,    13,    14,    -4,    15,
+      -4,    -4,    -4,    -4,    16,    18,    -4,    -4,    -4,    -4
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -571,21 +575,21 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       0,     0,     0,     0,     0,     0,     0,     0,    10,     0,
-       2,     0,     0,     5,     0,     0,     8,     0,     1,     3,
-       0,     0,     9,     6,     4,     7
+       0,     0,     0,     0,     0,     0,     0,     0,    12,    11,
+       0,     0,     2,     0,     0,     5,     0,     0,     8,     0,
+       1,    13,    10,     3,     0,     0,     9,     6,     4,     7
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -5,    -5
+      -4,    -4,    -4
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     9
+       0,    10,    11
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -593,39 +597,39 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       1,     2,     3,     4,     5,     6,     7,    10,     8,    12,
-      13,    11,    14,    15,    18,    16,    17,     0,    19,    20,
-      21,     0,    22,    23,    24,     0,    25
+       1,     2,     3,     4,     5,     6,     7,     8,     9,    14,
+      15,    21,    22,    12,    13,    16,    17,    20,    18,    19,
+       0,    23,    24,    25,     0,    26,    27,    28,     0,    29
 };
 
 static const yytype_int8 yycheck[] =
 {
-       3,     4,     5,     6,     7,     8,     9,    11,    11,    10,
-      11,    10,    10,    10,     0,    11,    10,    -1,    11,    10,
-      10,    -1,    11,    11,    11,    -1,    11
+       3,     4,     5,     6,     7,     8,     9,    10,    11,    10,
+      11,    10,    11,    11,    10,    10,    10,     0,    11,    10,
+      -1,    11,    10,    10,    -1,    11,    11,    11,    -1,    11
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     3,     4,     5,     6,     7,     8,     9,    11,    13,
-      11,    10,    10,    11,    10,    10,    11,    10,     0,    11,
-      10,    10,    11,    11,    11,    11
+       0,     3,     4,     5,     6,     7,     8,     9,    10,    11,
+      13,    14,    11,    10,    10,    11,    10,    10,    11,    10,
+       0,    10,    11,    11,    10,    10,    11,    11,    11,    11
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_int8 yyr1[] =
 {
        0,    12,    13,    13,    13,    13,    13,    13,    13,    13,
-      13
+      13,    13,    14,    14
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     2,     3,     4,     2,     3,     4,     2,     3,
-       1
+       2,     1,     1,     2
 };
 
 
@@ -1363,61 +1367,79 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* cmd_line: BYE END  */
-#line 27 "parser.y"
+#line 31 "parser.y"
                                                 {exit(1); return 1; }
-#line 1369 "parser.tab.c"
+#line 1373 "parser.tab.c"
     break;
 
   case 3: /* cmd_line: CD STRING END  */
-#line 28 "parser.y"
+#line 32 "parser.y"
                                                 {cd((yyvsp[-1].string)); return 1;}
-#line 1375 "parser.tab.c"
+#line 1379 "parser.tab.c"
     break;
 
   case 4: /* cmd_line: ALIAS STRING STRING END  */
-#line 29 "parser.y"
+#line 33 "parser.y"
                                                 {setAlias((yyvsp[-2].string), (yyvsp[-1].string)); return 1;}
-#line 1381 "parser.tab.c"
+#line 1385 "parser.tab.c"
     break;
 
   case 5: /* cmd_line: ALIAS END  */
-#line 30 "parser.y"
+#line 34 "parser.y"
                                                                 {listAliases(); return 1;}
-#line 1387 "parser.tab.c"
+#line 1391 "parser.tab.c"
     break;
 
   case 6: /* cmd_line: UNALIAS STRING END  */
-#line 31 "parser.y"
+#line 35 "parser.y"
                                                 {unAlias((yyvsp[-1].string)); return 1;}
-#line 1393 "parser.tab.c"
+#line 1397 "parser.tab.c"
     break;
 
   case 7: /* cmd_line: SETENV STRING STRING END  */
-#line 32 "parser.y"
+#line 36 "parser.y"
                                                 {setEnv((yyvsp[-2].string), (yyvsp[-1].string)); return 1;}
-#line 1399 "parser.tab.c"
+#line 1403 "parser.tab.c"
     break;
 
   case 8: /* cmd_line: PRINTENV END  */
-#line 33 "parser.y"
+#line 37 "parser.y"
                                                         {printEnv(); return 1;}
-#line 1405 "parser.tab.c"
+#line 1409 "parser.tab.c"
     break;
 
   case 9: /* cmd_line: UNSETENV STRING END  */
-#line 34 "parser.y"
+#line 38 "parser.y"
                                                 {unsetEnv((yyvsp[-1].string)); return 1;}
-#line 1411 "parser.tab.c"
+#line 1415 "parser.tab.c"
     break;
 
-  case 10: /* cmd_line: END  */
-#line 35 "parser.y"
-                                                                {return 1;}
-#line 1417 "parser.tab.c"
-    break;
-
-
+  case 10: /* cmd_line: nonBuiltIn END  */
+#line 39 "parser.y"
+                                                        {nonBuiltIn((yyvsp[-1].command)); return 1;}
 #line 1421 "parser.tab.c"
+    break;
+
+  case 11: /* cmd_line: END  */
+#line 40 "parser.y"
+                                                                {return 1;}
+#line 1427 "parser.tab.c"
+    break;
+
+  case 12: /* nonBuiltIn: STRING  */
+#line 44 "parser.y"
+                                                                { (yyval.command) = initCommand(); strcpy((yyval.command)->commandArr[(yyval.command)->index++], yylval.string); }
+#line 1433 "parser.tab.c"
+    break;
+
+  case 13: /* nonBuiltIn: nonBuiltIn STRING  */
+#line 45 "parser.y"
+                                            { strcpy((yyval.command)->commandArr[(yyval.command)->index++], yylval.string); }
+#line 1439 "parser.tab.c"
+    break;
+
+
+#line 1443 "parser.tab.c"
 
       default: break;
     }
@@ -1642,7 +1664,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 37 "parser.y"
+#line 47 "parser.y"
 
 
 int yyerror(char *s) {
@@ -1687,7 +1709,7 @@ int setAlias(char *name, char *word) {
 	for (int i = 0; i < aliasIndex; i++) {	
 		// checks if already in list I think
 		if((strcmp(aliasTable.name[i], name) == 0) && (strcmp(aliasTable.word[i], word) == 0)){
-			printf("Error, expansion of \"%s\" would create a loop.\n", name);
+			printf("Error, this exact alias already exists.\n");
 			return 1;
 		}
 		// overwrites existing alias for that same name
@@ -1822,6 +1844,44 @@ int printEnv(){
 
 	for (int i = 0; i < varIndex; i++) {
 		printf("%s=%s\n", varTable.var[i], varTable.word[i]);
+	}
+
+	return 1;
+}
+
+struct commandTable* initCommand(){
+	// struct commandTable* cur = malloc(sizeof(struct commandTable)); 
+	// char **array = malloc(WORDS * sizeof(char *));
+	// int i;
+	// for (i = 0; i < WORDS; ++i) {
+	// 	array[i] = (char *)malloc(WORD_LENGTH+1);
+	// }
+	// cur->commandArr = array;
+	// cur->index = 0;
+	// return cur;
+	struct commandTable* cur = malloc(sizeof(struct commandTable)); 
+	cur->index = 0;
+	return cur;
+	
+
+
+}
+
+void freeCommand(struct commandTable* cmd){
+	int i;
+	for (i = 0; i < WORDS; ++i) {
+		free(cmd->commandArr[i]);
+	}
+	// free(cmd->commandArr);
+	// free(cmd->index);
+	free(cmd);
+}
+
+int nonBuiltIn(struct commandTable* cmd){
+	printf("all good in coolsvilee");
+	int i;
+	for (i = 0; i < cmd->index; i++){
+		printf("%s ", cmd->commandArr[i]);
 	}
 
 	return 1;
