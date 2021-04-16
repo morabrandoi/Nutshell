@@ -33,7 +33,11 @@ cmd_line    :
 	| PRINTENV END					{printEnv(); return 1;}
 	| UNSETENV STRING END			{unsetEnv($2); return 1;}
 	| END 							{return 1;}
+	
 	;
+
+
+
 %%
 
 int yyerror(char *s) {
@@ -216,4 +220,8 @@ int printEnv(){
 	}
 
 	return 1;
+}
+
+int arbitrary_command(){
+
 }
