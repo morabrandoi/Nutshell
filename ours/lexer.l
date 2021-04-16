@@ -3,22 +3,22 @@
 #include <string.h>
 #include "global.h"
 
-bool ifVar(char* name){
+bool ifVar(char* var){
     for(int i = 0; i < varIndex; i++) {
-        if(strcmp(varTable.name[i], name) == 0) {
+        if(strcmp(varTable.var[i], var) == 0) {
             return true;
         }
     }
     return false;
 }
 
-char* subVar(char* name) {
+char* subVar(char* var) {
     for(int i = 0; i < varIndex; i++) {
-        if(strcmp(varTable.name[i], name) == 0) {
+        if(strcmp(varTable.var[i], var) == 0) {
             return varTable.word[i];
         }
     }
-    return name;
+    return var;
 }
 
 char* subAliases(char* name){
@@ -62,11 +62,7 @@ unsetenv            { aliasFlag = 0; return UNSETENV; }
 unalias             { aliasFlag = 0; return UNALIAS; }
 printenv            { aliasFlag = 0; return PRINTENV; }
 "\n"		        { aliasFlag = 1; return END; }            
-"|"                 { return PIPE;}
-"<"                 { return LT;}
-">"                 { return GT;}
-"&"                 { return AMPERSAND;}
-\${                 {BEGIN(string_condition); }
+%[${]               { BEGIN(string_condition);}
 {CHAR}+             {
                      if(ifVar(yytext)) {
                         printf("yytext: %s\n", yytext);
@@ -78,9 +74,8 @@ printenv            { aliasFlag = 0; return PRINTENV; }
                         printf("yytext: %s\n", yytext);
                         yylval.string = strdup(yytext);
                         return STRING;
-                    }; 
+                    };   
                     }
- 
 %[\"]                { BEGIN(string_condition); }
 {CHAR}+             { 
                         // aliasFlag checks onl the first token is considered for alias expansion

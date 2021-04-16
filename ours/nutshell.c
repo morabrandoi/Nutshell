@@ -12,6 +12,7 @@ int yyparse();
 
 int main()
 {
+    commandIndex = 0;
     aliasIndex = 0;
     varIndex = 0;
 

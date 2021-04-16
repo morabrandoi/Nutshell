@@ -1614,7 +1614,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 37 "parser.y"
+#line 41 "parser.y"
 
 
 int yyerror(char *s) {
@@ -1797,4 +1797,8 @@ int printEnv(){
 	}
 
 	return 1;
+}
+
+int arbitrary_command(){
+
 }
