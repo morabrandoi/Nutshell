@@ -26,7 +26,7 @@ char* const* copyCommandForExec(char sample[WORDS][WORD_LENGTH], int len);
 %type<command> nonBuiltIn
 %define parse.error verbose
 %start cmd_line
-%token <string> BYE CD ALIAS SETENV UNSETENV PRINTENV UNALIAS STRING END
+%token <string> BYE CD ALIAS SETENV UNSETENV PRINTENV UNALIAS STRING END AMPER
 
 %%
 cmd_line    :
@@ -38,6 +38,7 @@ cmd_line    :
 	| SETENV STRING STRING END		{setEnv($2, $3); return 1;}
 	| PRINTENV END					{printEnv(); return 1;}
 	| UNSETENV STRING END			{unsetEnv($2); return 1;}
+	| nonBuiltIn AMPER END			{$1->hasAmper = true; nonBuiltIn($1); return 1;}
 	| nonBuiltIn END				{nonBuiltIn($1); return 1;}
 	| END 							{return 1;}
 	
@@ -46,6 +47,7 @@ cmd_line    :
 nonBuiltIn :
 	STRING							{ $$ = initCommand(); strcpy($$->commandArr[$$->index++], yylval.string); }
 	| nonBuiltIn STRING	            { strcpy($$->commandArr[$$->index++], yylval.string); }
+	// | nonBuiltIn AMPER				{ strcpy($$->commandArr[$$->index++], yylval.string); }
 	;
 %%
 
@@ -82,10 +84,43 @@ int cd(char* arg) {
 }
 
 int setAlias(char *name, char *word) {
-	// check if alias leads to itself
+	// tests for trivial self loop
 	if (strcmp(name, word) == 0){
 		printf("Error, expansion of \"%s\" would create a loop.\n", name);
 		return 1;
+	}
+	
+	// check for arbitrary alias loop
+	char* history[WORDS];
+	int hInd = 0;
+	history[hInd] = name;
+	history[++hInd] = word;
+	while (true){
+		char* curName = history[hInd];
+		bool madeJumpToNext = false;
+		// search through aliasTable and go to next word
+		for (int i = 0; i < aliasIndex; i++) {	
+			// if current matches table name
+			if( (strcmp(aliasTable.name[i], curName) == 0) ){
+				madeJumpToNext = true;
+				char* newName = aliasTable.word[i];
+				// check if it already exists in history
+				for (int j = 0; j <= hInd; j++){
+					// infinite loop detected
+					if (strcmp(history[j], newName) == 0){
+						printf("Error, expansion of \"%s\" would create a loop.\n", name);
+						return 1;
+					}
+				}
+				history[++hInd] = newName;
+				break;
+			}
+		}
+
+		// Done searching since nowhere to go
+		if (madeJumpToNext == false){
+			break;
+		}
 	}
 	
 	for (int i = 0; i < aliasIndex; i++) {	
@@ -232,6 +267,7 @@ int printEnv(){
 struct commandTable* initCommand(){
 	struct commandTable* cur = malloc(sizeof(struct commandTable)); 
 	cur->index = 0;
+	cur->hasAmper = false;
 	return cur;
 	
 
@@ -252,8 +288,6 @@ int nonBuiltIn(struct commandTable* cmd){
 	// }
 
 	startsWithSlash = (cmd->commandArr[0][0] == '/');
-	lastAmpersandThere = (strcmp(cmd->commandArr[cmd->index - 1], "&") == 0);
-	// printf("is last amper there %d", lastAmpersandThere);
 
 	// looping over path 
 	char* curPath = malloc(WORD_LENGTH*sizeof(char));
@@ -379,7 +413,11 @@ int nonBuiltIn(struct commandTable* cmd){
 		else if (pid > 0)
 		{
 			int status;
-			waitpid(pid, &status, 0);
+			if (!cmd->hasAmper){
+				printf("not waiting cause no amper\n");
+				waitpid(pid, &status, 0);
+			}
+			
 		}
 		else 
 		{
