@@ -68,7 +68,7 @@ ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_
                                         return STRING;
                                     }; 
                                 }
-<var_condition>"}"      {BEGIN(INITIAL);}
+<var_condition>"}"              {BEGIN(INITIAL);}
 
 [ ]		            { }
 bye                 { yylval.string = strdup(yytext); return (onWordInd++ == 0) ? BYE : STRING; }
@@ -99,7 +99,5 @@ printenv            { yylval.string = strdup(yytext); return (onWordInd++ == 0) 
                             return STRING;
                         };
                     }
-
-"${"                { BEGIN(string_condition);}
 
 %%
