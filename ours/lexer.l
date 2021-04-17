@@ -37,7 +37,8 @@ bool ifAlias(char* name){
     }
     return false;
 }
-int aliasFlag = 1;
+
+int onWordInd = 0; // 0 based indexing
 
 %}
 %array
@@ -54,33 +55,19 @@ ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_
 <string_condition>[\"]          {BEGIN(INITIAL);}
 
 [ ]		            { }
-bye                 { aliasFlag = 0; return BYE; }
-cd		            { aliasFlag = 0; return CD;}
-alias		        { aliasFlag = 0; return ALIAS; }
-setenv              { aliasFlag = 0; return SETENV; }
-unsetenv            { aliasFlag = 0; return UNSETENV; }
-unalias             { aliasFlag = 0; return UNALIAS; }
-printenv            { aliasFlag = 0; return PRINTENV; }
-"\n"		        { aliasFlag = 1; return END; }            
-%[${]               { BEGIN(string_condition);}
-{CHAR}+             {
-                     if(ifVar(yytext)) {
-                        printf("yytext: %s\n", yytext);
-                           char *yycopy = strdup( subVar(yytext) );
-                           for ( int i = strlen(subVar(yytext)) - 1; i >= 0; --i )
-                               unput( yycopy[i] );
-                           free( yycopy );
-                    } else {
-                        printf("yytext: %s\n", yytext);
-                        yylval.string = strdup(yytext);
-                        return STRING;
-                    };   
-                    }
-%[\"]                { BEGIN(string_condition); }
+bye                 { yylval.string = strdup(yytext); return (onWordInd++ == 0) ? BYE : STRING; }
+cd		            { yylval.string = strdup(yytext); return (onWordInd++ == 0) ? CD : STRING;}
+alias		        { yylval.string = strdup(yytext); return (onWordInd++ == 0) ? ALIAS : STRING; }
+setenv              { yylval.string = strdup(yytext); return (onWordInd++ == 0) ? SETENV : STRING; }
+unsetenv            { yylval.string = strdup(yytext); return (onWordInd++ == 0) ? UNSETENV : STRING; }
+unalias             { yylval.string = strdup(yytext); return (onWordInd++ == 0) ? UNALIAS : STRING; }
+printenv            { yylval.string = strdup(yytext); return (onWordInd++ == 0) ? PRINTENV : STRING; }
+[\n\r]		        { onWordInd = 0; return END; }
+[\"]                { BEGIN(string_condition); }
 {CHAR}+             { 
-                        // aliasFlag checks onl the first token is considered for alias expansion
+                        // onWordInd checks onl the first token is considered for alias expansion
                         // this whole block basically checks if its an alias word and expands on it if it is
-                        if ( aliasFlag == 1 && ifAlias(yytext) ) {
+                        if ( onWordInd == 0 && ifAlias(yytext) ) {
                             printf("yytext: %s\n", yytext);
                             //source: https://www.cs.princeton.edu/~appel/modern/c/software/flex/flex.html
                             char *yycopy = strdup( subAliases(yytext) );
@@ -90,7 +77,7 @@ printenv            { aliasFlag = 0; return PRINTENV; }
                         } else {
                             printf("yytext: %s\n", yytext);
                             yylval.string = strdup(yytext);
-                            aliasFlag = 0;
+                            onWordInd++;
                             return STRING;
                         };
                     }
