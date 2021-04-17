@@ -63,6 +63,20 @@ unsetenv            { yylval.string = strdup(yytext); return (onWordInd++ == 0) 
 unalias             { yylval.string = strdup(yytext); return (onWordInd++ == 0) ? UNALIAS : STRING; }
 printenv            { yylval.string = strdup(yytext); return (onWordInd++ == 0) ? PRINTENV : STRING; }
 [\n\r]		        { onWordInd = 0; return END; }
+%[${]               { BEGIN(string_condition);}
+{CHAR}+             {
+                     if(ifVar(yytext)) {
+                        printf("yytext: %s\n", yytext);
+                           char *yycopy = strdup( subVar(yytext) );
+                           for ( int i = strlen(subVar(yytext)) - 1; i >= 0; --i )
+                               unput( yycopy[i] );
+                           free( yycopy );
+                    } else {
+                        printf("yytext: %s\n", yytext);
+                        yylval.string = strdup(yytext);
+                        return STRING;
+                    };   
+                    }
 [\"]                { BEGIN(string_condition); }
 {CHAR}+             { 
                         // onWordInd checks onl the first token is considered for alias expansion
