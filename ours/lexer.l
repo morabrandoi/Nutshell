@@ -57,13 +57,11 @@ METACHAR        [<>|"\&]
 <string_condition>[\"]          {BEGIN(INITIAL);}
 
 <var_condition>{CHAR}+          { if ( ifVar(yytext) ) {
-                                    printf("yytext: %s\n", yytext);
                                     char *yycopy = strdup( subVar(yytext) );
                                     for ( int i = strlen(subVar(yytext)) - 1; i >= 0; --i )
                                         unput( yycopy[i] );
                                     free( yycopy );
                                     } else {
-                                        printf("yytext: %s\n", yytext);
                                         yylval.string = strdup(yytext);
                                         onWordInd++;
                                         return STRING;
@@ -91,14 +89,11 @@ printenv            { yylval.string = strdup(yytext); return (onWordInd++ == 0) 
                         // onWordInd checks onl the first token is considered for alias expansion
                         // this whole block basically checks if its an alias word and expands on it if it is
                         if ( onWordInd == 0 && ifAlias(yytext) ) {
-                            printf("yytext: %s\n", yytext);
-                            //source: https://www.cs.princeton.edu/~appel/modern/c/software/flex/flex.html
                             char *yycopy = strdup( subAliases(yytext) );
                             for ( int i = strlen(subAliases(yytext)) - 1; i >= 0; --i )
                                 unput( yycopy[i] );
                             free( yycopy );
                         } else {
-                            printf("yytext: %s\n", yytext);
                             yylval.string = strdup(yytext);
                             onWordInd++;
                             return STRING;

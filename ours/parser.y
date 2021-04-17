@@ -414,7 +414,7 @@ int nonBuiltIn(struct commandTable* cmd){
 		{
 			int status;
 			if (!cmd->hasAmper){
-				printf("not waiting cause no amper\n");
+				// printf("not waiting cause no amper\n");
 				waitpid(pid, &status, 0);
 			}
 			
@@ -428,7 +428,7 @@ int nonBuiltIn(struct commandTable* cmd){
 		}
 	}
 	else{
-		printf("Command not found: %s\n",  cmd->commandArr[0]);
+		printf("Command not found: %s\n\n",  cmd->commandArr[0]);
 	}
 
 	return 1;
