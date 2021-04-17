@@ -29,6 +29,7 @@ int main()
     varIndex++;
     strcpy(varTable.var[varIndex], "PATH");
     strcpy(varTable.word[varIndex], getenv("PATH"));
+    strcat(varTable.word[varIndex], ":.");
     varIndex++;
 
     system("clear");

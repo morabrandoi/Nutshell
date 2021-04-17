@@ -2,3 +2,7 @@
 /ours/parser.tab.h
 /ours/lex.yy.c
 /ours/nutshell
+/nutshell_sample/nutshparser.tab.c
+/nutshell_sample/nutshparser.tab.h
+/nutshell_sample/lex.yy.c
+/nutshell_sample/nutshell

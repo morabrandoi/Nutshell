@@ -1,20 +1,20 @@
 #include "stdbool.h"
 #include <limits.h>
-#define WORDS 128
-#define WORD_LENGTH 100
+#define WORDS 256
+#define WORD_LENGTH 256
 
 struct evTable {
-   char var[128][100];
-   char word[128][100];
+   char var[WORDS][WORD_LENGTH];
+   char word[WORDS][WORD_LENGTH];
 };
 
 struct aTable {
-	char name[128][100];
-	char word[128][100];
+	char name[WORDS][WORD_LENGTH];
+	char word[WORDS][WORD_LENGTH];
 };
 
 struct commandTable {
-   char commandArr[128][100];
+   char commandArr[WORDS][WORD_LENGTH];
    int index;
 };
 
