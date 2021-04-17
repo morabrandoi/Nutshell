@@ -18,6 +18,7 @@ int yylex(void);
 int yyerror(const char *s);
 int nonBuiltIn(struct commandTable* cmd);
 struct commandTable* initCommand();
+char* const* copyCommandForExec(char sample[WORDS][WORD_LENGTH], int len);
 
 %}
 
@@ -242,12 +243,12 @@ int nonBuiltIn(struct commandTable* cmd){
 	bool startsWithSlash;
 
 	// Printing command for validity checking. Comment out before submitting
-	int i;
-	for (i = 0; i < cmd->index; i++){
-		printf("PRINTING COMMAND");
-		printf("%s ", cmd->commandArr[i]);
-		printf("\n\n");
-	}
+	// int i;
+	// printf("\nPRINTING WHOLE COMMAND ");
+	// for (i = 0; i < cmd->index; i++){
+	// 	printf("%s ", cmd->commandArr[i]);
+	// 	printf("\n\n");
+	// }
 
 	startsWithSlash = (cmd->commandArr[0][0] == '/');
 
@@ -362,15 +363,43 @@ int nonBuiltIn(struct commandTable* cmd){
 	}
 	free(curPath);
 	
-
-
 	if (foundExecutable){
 		// execute process based on execPath
-		printf("about to execute thing at %s\n", execPath);
+		// printf("about to execute thing at %s\n", execPath);
+
+		pid_t pid = fork();
+
+		if (pid == -1)
+		{
+			// error, failed to fork()
+		} 
+		else if (pid > 0)
+		{
+			int status;
+			waitpid(pid, &status, 0);
+		}
+		else 
+		{
+			// we are the child
+			char* const* goodFormArgs = copyCommandForExec(cmd->commandArr, cmd->index);
+			execv(execPath, goodFormArgs);
+			_exit(EXIT_FAILURE);   // exec never returns
+		}
 	}
 	else{
 		printf("Could not find executable for %s\n",  cmd->commandArr[0]);
 	}
 
 	return 1;
+}
+
+char* const* copyCommandForExec(char sample[WORDS][WORD_LENGTH], int len){
+	char** answer = malloc(WORDS * sizeof(char*));
+	int i;
+	for (i = 0; i < len; i++){
+		answer[i] = malloc(WORD_LENGTH*sizeof(char));
+		answer[i] = sample[i];
+	}
+	answer[len] = NULL;
+	return answer;
 }
