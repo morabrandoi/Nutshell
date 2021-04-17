@@ -3,10 +3,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <dirent.h> // for directory reading
 #include "global.h"
 
-int yylex(void);
-int yyerror(char *s);
 int cd(char* arg);
 int setAlias(char *name, char *word); // implemented. Needs to check for loops of arbitrary size
 int unAlias(char *name); 
@@ -14,6 +13,9 @@ int listAliases();
 int setEnv(char* var, char* word);
 int unsetEnv(char* name);
 int printEnv();
+
+int yylex(void);
+int yyerror(const char *s);
 int nonBuiltIn(struct commandTable* cmd);
 struct commandTable* initCommand();
 
@@ -46,7 +48,7 @@ nonBuiltIn :
 	;
 %%
 
-int yyerror(char *s) {
+int yyerror(const char *s) {
   printf("%s\n",s);
   return 0;
   }
@@ -110,10 +112,8 @@ int listAliases(){
 		return 1;
 	}
 
-	printf("Alias : Expansion\n");
-	printf("-----------------\n");
 	for (int i = 0; i < aliasIndex; i++) {
-		printf("%s : %s\n", aliasTable.name[i], aliasTable.word[i]);
+		printf("%s=%s\n", aliasTable.name[i], aliasTable.word[i]);
 	}
 
 	return 1;
@@ -229,15 +229,6 @@ int printEnv(){
 }
 
 struct commandTable* initCommand(){
-	// struct commandTable* cur = malloc(sizeof(struct commandTable)); 
-	// char **array = malloc(WORDS * sizeof(char *));
-	// int i;
-	// for (i = 0; i < WORDS; ++i) {
-	// 	array[i] = (char *)malloc(WORD_LENGTH+1);
-	// }
-	// cur->commandArr = array;
-	// cur->index = 0;
-	// return cur;
 	struct commandTable* cur = malloc(sizeof(struct commandTable)); 
 	cur->index = 0;
 	return cur;
@@ -247,9 +238,138 @@ struct commandTable* initCommand(){
 }
 
 int nonBuiltIn(struct commandTable* cmd){
+	char* execPath = malloc(WORD_LENGTH*sizeof(char));
+	bool startsWithSlash;
+
+	// Printing command for validity checking. Comment out before submitting
 	int i;
 	for (i = 0; i < cmd->index; i++){
+		printf("PRINTING COMMAND");
 		printf("%s ", cmd->commandArr[i]);
+		printf("\n\n");
+	}
+
+	startsWithSlash = (cmd->commandArr[0][0] == '/');
+
+	// looping over path 
+	char* curPath = malloc(WORD_LENGTH*sizeof(char));
+	char curChar = '0';
+	int pathInd = 0;
+	int curInd = 0; 
+	bool foundExecutable = false;
+	while (!foundExecutable && curChar != 0){
+		// if command starts with / replace currentPath with command
+		if ( startsWithSlash ){
+			strcpy(curPath, cmd->commandArr[0]);
+			
+			if ( access(curPath, X_OK) == 0)
+			{
+				foundExecutable = true;
+				// printf("found a good one at %s\n", curPath);
+				strcpy(execPath, curPath);
+				break;
+			}
+			else{
+				// printf("Executable could not be found at %s\n", curPath);
+				break;
+			}
+
+		}
+
+
+		// remove single leter and add it to curPath string
+		curChar = varTable.word[3][pathInd];	
+		
+		// reached end of currentPath or end of whole PATH
+		bool atLastCharInPath = (pathInd == strlen(varTable.word[3]) - 1);
+		bool atSemiColon = curChar == ':';
+		if ( atSemiColon || atLastCharInPath ){
+			// end of PATH is special case. need to make sure i'm adding last char
+			if (atLastCharInPath)
+				curPath[curInd++] = curChar;
+
+			// check if curPath is dot, in which case replace it with current directory
+			if ( strcmp(curPath, ".") == 0)
+				strcpy(curPath, varTable.word[0]);
+
+			
+
+			// printf("Checking: %s\n", curPath);
+			// look for things in this path
+
+			struct dirent *dirEntry;  // Pointer for directory ENTRY			
+			DIR *dir = opendir(curPath); // pointer of DIR type. 
+			if (dir == NULL)  // opendir returns NULL if couldn't open directory
+			{
+				// printf("Could not open directory %s\n\n", curPath);
+			}
+			else{
+				// going through files of dir. looking for executable
+				while ( (dirEntry = readdir(dir)) != NULL){
+					// we don't care about entries . and ..
+					if (!strcmp (dirEntry->d_name, "."))
+						continue;
+					if (!strcmp (dirEntry->d_name, ".."))    
+						continue;
+					
+					// checking if command name is even a match. skip if not.
+					bool correctCommand = strcmp(cmd->commandArr[0], dirEntry->d_name) == 0;
+					if (!correctCommand)
+						continue;
+				
+					// constructing full path
+					char fullPath[WORD_LENGTH];
+					strcpy(fullPath, curPath);
+					strcat(fullPath, "/");
+					strcat(fullPath, dirEntry->d_name);
+
+					// checking if file exists and is executable
+					if ( access(fullPath, X_OK) == 0)
+					{
+						foundExecutable = true;
+						// printf("found a good one at %s\n", fullPath);
+						strcpy(execPath, fullPath);
+						break;
+					}
+				}
+				closedir(dir);    
+			}
+			
+			// reset curPath
+			free(curPath);
+			curPath = malloc(WORD_LENGTH*sizeof(char));
+
+			// move to next letter
+			curInd = 0;
+			pathInd++;
+		}
+		// adding letter to curPath and incrementing indeces
+		else{
+			// replacing tilde at beginning of path with HOME path
+			if (curInd == 0 && curChar=='~'){
+				char* home = varTable.word[1];
+				strcpy(curPath, home);
+
+				curInd += strlen(home);
+				pathInd++;
+				continue;
+			}
+
+			curPath[curInd] = curChar;
+			curInd++;
+			pathInd++;
+		}
+	}
+	free(curPath);
+	
+
+
+	if (foundExecutable){
+		// execute process based on execPath
+		printf("about to execute thing at %s\n", execPath);
+	}
+	else{
+		printf("Could not find executable for %s\n",  cmd->commandArr[0]);
 	}
 
 	return 1;
