@@ -26,7 +26,7 @@ char* const* copyCommandForExec(char sample[WORDS][WORD_LENGTH], int len);
 %type<command> nonBuiltIn
 %define parse.error verbose
 %start cmd_line
-%token <string> BYE CD ALIAS SETENV UNSETENV PRINTENV UNALIAS STRING END
+%token <string> BYE CD ALIAS SETENV UNSETENV PRINTENV UNALIAS STRING END AMPER
 
 %%
 cmd_line    :
@@ -38,6 +38,7 @@ cmd_line    :
 	| SETENV STRING STRING END		{setEnv($2, $3); return 1;}
 	| PRINTENV END					{printEnv(); return 1;}
 	| UNSETENV STRING END			{unsetEnv($2); return 1;}
+	| nonBuiltIn AMPER END			{$1->hasAmper = true; nonBuiltIn($1); return 1;}
 	| nonBuiltIn END				{nonBuiltIn($1); return 1;}
 	| END 							{return 1;}
 	
@@ -46,6 +47,7 @@ cmd_line    :
 nonBuiltIn :
 	STRING							{ $$ = initCommand(); strcpy($$->commandArr[$$->index++], yylval.string); }
 	| nonBuiltIn STRING	            { strcpy($$->commandArr[$$->index++], yylval.string); }
+	// | nonBuiltIn AMPER				{ strcpy($$->commandArr[$$->index++], yylval.string); }
 	;
 %%
 
@@ -265,6 +267,7 @@ int printEnv(){
 struct commandTable* initCommand(){
 	struct commandTable* cur = malloc(sizeof(struct commandTable)); 
 	cur->index = 0;
+	cur->hasAmper = false;
 	return cur;
 	
 
@@ -285,8 +288,6 @@ int nonBuiltIn(struct commandTable* cmd){
 	// }
 
 	startsWithSlash = (cmd->commandArr[0][0] == '/');
-	lastAmpersandThere = (strcmp(cmd->commandArr[cmd->index - 1], "&") == 0);
-	// printf("is last amper there %d", lastAmpersandThere);
 
 	// looping over path 
 	char* curPath = malloc(WORD_LENGTH*sizeof(char));
@@ -412,7 +413,11 @@ int nonBuiltIn(struct commandTable* cmd){
 		else if (pid > 0)
 		{
 			int status;
-			waitpid(pid, &status, 0);
+			if (!cmd->hasAmper){
+				printf("not waiting cause no amper\n");
+				waitpid(pid, &status, 0);
+			}
+			
 		}
 		else 
 		{

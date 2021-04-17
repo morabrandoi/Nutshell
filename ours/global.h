@@ -16,6 +16,7 @@ struct aTable {
 struct commandTable {
    char commandArr[WORDS][WORD_LENGTH];
    int index;
+   bool hasAmper;
 };
 
 char cwd[PATH_MAX];

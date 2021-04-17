@@ -47,7 +47,8 @@ int onWordInd = 0; // 0 based indexing
 %x var_condition
 
 CHAR            [.A-Za-z0-9!\/_-][.A-Za-z0-9!\/_-]* 
-ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -]*
+ANYCHAR         [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -]*
+METACHAR        [<>|"\&]
 
 
 %%
@@ -70,6 +71,7 @@ ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_
                                 }
 <var_condition>"}"              {BEGIN(INITIAL);}
 
+
 [ ]		            { }
 bye                 { yylval.string = strdup(yytext); return (onWordInd++ == 0) ? BYE : STRING; }
 cd		            { yylval.string = strdup(yytext); return (onWordInd++ == 0) ? CD : STRING;}
@@ -82,6 +84,9 @@ printenv            { yylval.string = strdup(yytext); return (onWordInd++ == 0) 
 
 [\"]                { BEGIN(string_condition); }
 "${"                { BEGIN(var_condition);}
+
+"&"                 { yylval.string = strdup(yytext); return AMPER;}
+
 {CHAR}+             { 
                         // onWordInd checks onl the first token is considered for alias expansion
                         // this whole block basically checks if its an alias word and expands on it if it is
