@@ -241,16 +241,19 @@ struct commandTable* initCommand(){
 int nonBuiltIn(struct commandTable* cmd){
 	char* execPath = malloc(WORD_LENGTH*sizeof(char));
 	bool startsWithSlash;
+	bool lastAmpersandThere;
 
 	// Printing command for validity checking. Comment out before submitting
 	// int i;
-	// printf("\nPRINTING WHOLE COMMAND ");
+	// printf("\nPRINTING WHOLE COMMAND\n");
 	// for (i = 0; i < cmd->index; i++){
 	// 	printf("%s ", cmd->commandArr[i]);
 	// 	printf("\n\n");
 	// }
 
 	startsWithSlash = (cmd->commandArr[0][0] == '/');
+	lastAmpersandThere = (strcmp(cmd->commandArr[cmd->index - 1], "&") == 0);
+	// printf("is last amper there %d", lastAmpersandThere);
 
 	// looping over path 
 	char* curPath = malloc(WORD_LENGTH*sizeof(char));
@@ -387,7 +390,7 @@ int nonBuiltIn(struct commandTable* cmd){
 		}
 	}
 	else{
-		printf("Could not find executable for %s\n",  cmd->commandArr[0]);
+		printf("Command not found: %s\n",  cmd->commandArr[0]);
 	}
 
 	return 1;
