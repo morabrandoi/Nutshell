@@ -29,4 +29,6 @@ struct aTable aliasTable;
 // char anyCommand[WORDS][WORD_LENGTH];
 int aliasIndex, varIndex;
 
+int commandIndex;
+
 char* subAliases(char* name);

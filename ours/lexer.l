@@ -3,6 +3,24 @@
 #include <string.h>
 #include "global.h"
 
+bool ifVar(char* var){
+    for(int i = 0; i < varIndex; i++) {
+        if(strcmp(varTable.var[i], var) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+char* subVar(char* var) {
+    for(int i = 0; i < varIndex; i++) {
+        if(strcmp(varTable.var[i], var) == 0) {
+            return varTable.word[i];
+        }
+    }
+    return var;
+}
+
 char* subAliases(char* name){
     for (int i = 0; i < aliasIndex; i++) {
         if(strcmp(aliasTable.name[i], name) == 0) {
@@ -27,8 +45,9 @@ int onWordInd = 0; // 0 based indexing
 %option noyywrap
 %x string_condition
 
-CHAR            [.A-Za-z0-9!\/_-][.A-Za-z0-9!\/_-]*
+CHAR            [.A-Za-z0-9!\/_-][.A-Za-z0-9!\/_-]* 
 ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -]*
+
 
 %%
 

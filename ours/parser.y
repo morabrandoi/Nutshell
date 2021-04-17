@@ -37,6 +37,7 @@ cmd_line    :
 	| UNSETENV STRING END			{unsetEnv($2); return 1;}
 	| nonBuiltIn END				{nonBuiltIn($1); return 1;}
 	| END 							{return 1;}
+	
 	;
 
 nonBuiltIn :
