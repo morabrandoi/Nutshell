@@ -44,6 +44,7 @@ int onWordInd = 0; // 0 based indexing
 %array
 %option noyywrap
 %x string_condition
+%x var_condition
 
 CHAR            [.A-Za-z0-9!\/_-][.A-Za-z0-9!\/_-]* 
 ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -]*
@@ -51,8 +52,23 @@ ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_
 
 %%
 
-<string_condition>{ANYCHAR}+     { yylval.string = strdup(yytext); return STRING;}
+<string_condition>{ANYCHAR}+    { yylval.string = strdup(yytext); return STRING;}
 <string_condition>[\"]          {BEGIN(INITIAL);}
+
+<var_condition>{CHAR}+          { if ( ifVar(yytext) ) {
+                                    printf("yytext: %s\n", yytext);
+                                    char *yycopy = strdup( subVar(yytext) );
+                                    for ( int i = strlen(subVar(yytext)) - 1; i >= 0; --i )
+                                        unput( yycopy[i] );
+                                    free( yycopy );
+                                    } else {
+                                        printf("yytext: %s\n", yytext);
+                                        yylval.string = strdup(yytext);
+                                        onWordInd++;
+                                        return STRING;
+                                    }; 
+                                }
+<var_condition>"}"      {BEGIN(INITIAL);}
 
 [ ]		            { }
 bye                 { yylval.string = strdup(yytext); return (onWordInd++ == 0) ? BYE : STRING; }
@@ -63,21 +79,9 @@ unsetenv            { yylval.string = strdup(yytext); return (onWordInd++ == 0) 
 unalias             { yylval.string = strdup(yytext); return (onWordInd++ == 0) ? UNALIAS : STRING; }
 printenv            { yylval.string = strdup(yytext); return (onWordInd++ == 0) ? PRINTENV : STRING; }
 [\n\r]		        { onWordInd = 0; return END; }
-"${"                { BEGIN(string_condition);}
-{CHAR}+             {
-                        if(ifVar(yytext)) {
-                            printf("yytext: %s\n", yytext);
-                            char *yycopy = strdup( subVar(yytext) );
-                            for ( int i = strlen(subVar(yytext)) - 1; i >= 0; --i )
-                                unput( yycopy[i] );
-                            free( yycopy );
-                        } else {
-                            printf("yytext: %s\n", yytext);
-                            yylval.string = strdup(yytext);
-                            return STRING;
-                        };   
-                    }
+
 [\"]                { BEGIN(string_condition); }
+"${"                { BEGIN(var_condition);}
 {CHAR}+             { 
                         // onWordInd checks onl the first token is considered for alias expansion
                         // this whole block basically checks if its an alias word and expands on it if it is
@@ -95,4 +99,7 @@ printenv            { yylval.string = strdup(yytext); return (onWordInd++ == 0) 
                             return STRING;
                         };
                     }
+
+"${"                { BEGIN(string_condition);}
+
 %%
