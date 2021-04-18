@@ -46,7 +46,7 @@ int onWordInd = 0; // 0 based indexing
 %x string_condition
 %x var_condition
 
-CHAR            [.A-Za-z0-9!\/_-][.A-Za-z0-9!\/_-]* 
+CHAR            [(\\&)(\\")(\\|)(\\\\)(\\>)(\\<).A-Za-z0-9!\?*/_-][(\\&)(\\")(\\|)(\\\\)(\\>)(\\<).A-Za-z0-9!\?*/_-]*
 ANYCHAR         [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -]*
 METACHAR        [<>|"\&]
 
@@ -87,17 +87,36 @@ printenv            { yylval.string = strdup(yytext); return (onWordInd++ == 0) 
 
 "&"                 { yylval.string = strdup(yytext); return AMPER;}
 
-{CHAR}+             { 
+{CHAR}+             {   
+                           int i=0;
+                           int j=0;
+                            char *text = strdup(yytext);
+                            while(i < strlen(text)) {                               
+                                if(text[i]=='\\' && text[i+1]=='\\' && i <= strlen(text)-1) {
+                                    i++;                            
+                                }
+                                if(text[i]=='\\') { 
+                                    for(j=i; j < strlen(text); j++) {
+                                        text[j] = text[j+1];
+                                    } 
+                                }
+                                else {
+                                        i++;
+                                }
+                            }
+                             strcpy(yytext,text);
                         // onWordInd checks onl the first token is considered for alias expansion
                         // this whole block basically checks if its an alias word and expands on it if it is
                         if ( onWordInd == 0 && ifAlias(yytext) ) {
                             printf("yytext: %s\n", yytext);
                             //source: https://www.cs.princeton.edu/~appel/modern/c/software/flex/flex.html
                             char *yycopy = strdup( subAliases(yytext) );
-                            for ( int i = strlen(subAliases(yytext)) - 1; i >= 0; --i )
+                            
+                            for ( int i = strlen(subAliases(yytext)) - 1; i >= 0; --i ){
                                 unput( yycopy[i] );
+                            }
                             free( yycopy );
-                        } else {
+                        } else {                                
                             printf("yytext: %s\n", yytext);
                             yylval.string = strdup(yytext);
                             onWordInd++;

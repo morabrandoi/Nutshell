@@ -414,7 +414,6 @@ int nonBuiltIn(struct commandTable* cmd){
 		{
 			int status;
 			if (!cmd->hasAmper){
-				printf("not waiting cause no amper\n");
 				waitpid(pid, &status, 0);
 			}
 			
