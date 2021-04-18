@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <dirent.h> // for directory reading
+#include <glob.h>
 #include "global.h"
 
 int cd(char* arg);
@@ -19,6 +20,7 @@ int yyerror(const char *s);
 int nonBuiltIn(struct commandTable* cmd);
 struct commandTable* initCommand();
 char* const* copyCommandForExec(char sample[WORDS][WORD_LENGTH], int len);
+void replaceWildcards(struct commandTable* cmd);
 
 %}
 
@@ -275,17 +277,31 @@ struct commandTable* initCommand(){
 }
 
 int nonBuiltIn(struct commandTable* cmd){
-	char* execPath = malloc(WORD_LENGTH*sizeof(char));
-	bool startsWithSlash;
-	bool lastAmpersandThere;
 
 	// Printing command for validity checking. Comment out before submitting
 	// int i;
 	// printf("\nPRINTING WHOLE COMMAND\n");
 	// for (i = 0; i < cmd->index; i++){
 	// 	printf("%s ", cmd->commandArr[i]);
-	// 	printf("\n\n");
 	// }
+	// printf("\n\n");
+
+	// wildcard matching
+	replaceWildcards(cmd);
+
+	// Printing command for validity checking. Comment out before submitting
+	// printf("\nPRINTING WHOLE COMMAND\n");
+	// int k;
+	// for (k = 0; k < cmd->index; k++){
+	// 	printf("%s | ", cmd->commandArr[k]);
+	// }
+	// printf("\n\n");
+
+
+
+	char* execPath = malloc(WORD_LENGTH*sizeof(char));
+	bool startsWithSlash;
+	bool lastAmpersandThere;
 
 	startsWithSlash = (cmd->commandArr[0][0] == '/');
 
@@ -414,7 +430,7 @@ int nonBuiltIn(struct commandTable* cmd){
 		{
 			int status;
 			if (!cmd->hasAmper){
-				printf("not waiting cause no amper\n");
+				// printf("not waiting cause no amper\n");
 				waitpid(pid, &status, 0);
 			}
 			
@@ -428,7 +444,7 @@ int nonBuiltIn(struct commandTable* cmd){
 		}
 	}
 	else{
-		printf("Command not found: %s\n",  cmd->commandArr[0]);
+		printf("Command not found: %s\n\n",  cmd->commandArr[0]);
 	}
 
 	return 1;
@@ -443,4 +459,50 @@ char* const* copyCommandForExec(char sample[WORDS][WORD_LENGTH], int len){
 	}
 	answer[len] = NULL;
 	return answer;
+}
+
+void replaceWildcards(struct commandTable* cmd){
+	int insertInd;
+	for (int i = 0; i <= cmd->index - 1; i++){
+		char* word = cmd->commandArr[i];
+
+		bool containsQM = strchr(word, '?') != NULL;
+		bool containsWC = strchr(word, '*') != NULL;
+
+		if (containsQM || containsWC){
+			insertInd = i;
+			glob_t paths;
+			int retval;
+			
+			paths.gl_pathc = 0;
+			paths.gl_pathv = NULL;
+			paths.gl_offs = 0;
+
+			retval = glob( word, GLOB_NOCHECK,
+						NULL, &paths );
+			if( retval == 0 ) {
+				// shifting typed-in commands over to make room for expansion of wildcard
+				int shiftAmt = paths.gl_pathc - 1;
+				int shiftInd;
+				for (shiftInd = cmd->index-1; shiftInd > insertInd; shiftInd--){
+					strcpy(cmd->commandArr[shiftInd + shiftAmt], cmd->commandArr[shiftInd]);
+				}
+
+				// moving glob filepaths into array
+				int globInd;
+				for ( globInd = 0; globInd < paths.gl_pathc; globInd++){
+					strcpy(cmd->commandArr[insertInd + globInd], paths.gl_pathv[globInd]);
+				}
+
+				cmd->index += shiftAmt;
+				
+				globfree( &paths );
+			} else {
+				printf("Sorry, wildcard globbing failed. Try agian.");
+			}
+
+		}
+		
+	}	
+
 }
