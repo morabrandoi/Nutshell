@@ -1,7 +1,7 @@
 #include "stdbool.h"
 #include <limits.h>
-#define WORDS 256
-#define WORD_LENGTH 256
+#define WORDS 1024
+#define WORD_LENGTH 1024
 
 struct evTable {
    char var[WORDS][WORD_LENGTH];
