@@ -4,9 +4,7 @@ Both members worked with each other to ensure that each one was doing their part
 the README document. Both tested various commands to ensure that the implemented features were working properly.
 
 ## Brando Mora:
-Set up and created base structure for built-in commands and non-built-in commands. Responsible for developing setenv, printenv, unsetenv, cd, alias, unalias, and bye. 
-Created the code for alias expansion. Responsible for dealing with infinitealias loop expansion. Completely responsible for wildcard matching. Worked on ensuring shell robustness
-by accounting for possible errors. Responsible for having non-built-in commands running in the background.
+Set up and created base structure for built-in commands and non-built-in commands. Responsible for developing setenv, printenv, unsetenv, cd, alias, unalias, and bye. Created the code for alias expansion. Responsible for dealing with infinite alias loop expansion. Responsible for wildcard matching. Worked on ensuring shell robustness by accounting for possible errors. Responsible for having non-built-in commands running in the background.
 
 ## Martin Tolxdorf:
 Assisted in developing built-in commands and non-built-in commands. Created the code for environment variable expansion and assisted with alias expansion.
