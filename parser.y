@@ -89,7 +89,7 @@ int setAlias(char *name, char *word) {
 	// tests for trivial self loop
 	if (strcmp(name, word) == 0){
 		printf("Error, expansion of \"%s\" would create a loop.\n", name);
-		return 1;
+		return 0;
 	}
 	
 	// check for arbitrary alias loop
@@ -216,6 +216,10 @@ int setEnv(char* var, char* word){
 }
 
 int unsetEnv(char* var){
+	if(strcmp(var, "HOME") == 0 || strcmp(var, "PATH") == 0) {
+		printf("ERROR: Cannot unset %s\n", var);
+		return 0;
+	}
 	int removeIndex = -1;
 	// find index to remove
 	for (int i = 0; i < varIndex; i++) {
