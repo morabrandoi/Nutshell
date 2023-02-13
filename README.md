@@ -11,15 +11,7 @@ Assisted in developing built-in commands and non-built-in commands. Created the 
 Worked on creating various tokens for the lexer including handling for metacharacters and handling of those characters being backslashed. Began working on Tilde Expansion
 but was unable to complete. Worked on ensuring shell robustness by accounting for possible errors.
 
-## Features NOT implemented
-* I/O redirection
-* Piping functionality
-
-## Extra Credit Features NOT implemented
-* Tilde Expansion
-* File Name completion
-
-## Features that ARE implemented
+## Features Implemented
 * all built-in commands (including alias loop detection)
 * Alias expansion
 * Environment variable expansion
